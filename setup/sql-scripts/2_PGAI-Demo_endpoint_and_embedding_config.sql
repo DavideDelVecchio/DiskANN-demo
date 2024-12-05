@@ -12,9 +12,8 @@ SELECT * FROM pg_available_extensions
 WHERE name IN ('azure_ai','vector', 'pg_diskann');
 
 
--- Create the extensions in the pgai database
-CREATE EXTENSION vector;
-CREATE EXTENSION pg_diskann;
+-- CREATE EXTENSION vector;
+-- CREATE EXTENSION pg_diskann;
 CREATE EXTENSION azure_ai;
 
 -- Setup Azure OpenAI endpoint
@@ -27,8 +26,8 @@ ALTER TABLE listings
 ADD COLUMN description_vector vector(1536) --OPEN AI embeddings are 1536 dimensions
 GENERATED ALWAYS AS (
 	azure_openai.create_embeddings (
-	'text-embedding-3-small', -- example deployment name in Azure OpenAI which CONTAINS text-embedding-ADA-003-small-model
-	name || description || summary)::vector) STORED; -- TEXT strings concatenated AND sent TO Azure OpenAI
+	'demo-cosmos-rag-emb', -- example deployment name in Azure OpenAI which CONTAINS text-embedding-ADA-003-small-model
+	name || description || summary , timeout_ms => 3600000, throw_on_error =>  false,  max_attempts =>  5, retry_delay_ms =>  1000)::vector) STORED; -- TEXT strings concatenated AND sent TO Azure OpenAI
 
 -- Create the diskann index and table
 CREATE TABLE listings_hnsw AS TABLE listings;
